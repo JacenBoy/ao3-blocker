@@ -5,7 +5,7 @@
 // @namespace     https://github.com/JacenBoy/ao3-blocker#readme
 // @license       Apache-2.0; http://www.apache.org/licenses/LICENSE-2.0
 // @include       http*://archiveofourown.org/*
-// @version       2.0
+// @version       2.1
 // @require       https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js
 // @grant         GM_getValue
@@ -17,6 +17,7 @@
 
 (function () {
   "use strict";
+  window.ao3Blocker = {};
 
   GM_config.init({
     "id": "ao3Blocker",
@@ -62,7 +63,17 @@
         "type": "checkbox",
         "default": false
       }
-    }
+    },
+    "events": {
+      "save": function() {
+        window.ao3Blocker.updated = true;
+        alert("Your changes have been saved.");
+      },
+      "close": function() {
+        if (window.ao3Blocker.updated) location.reload();
+      }
+    },
+    "css": ".config_var {display: grid; grid-template-columns: repeat(2, 0.7fr);}"
   });
 
   var STYLE = "\n  html body .ao3-blocker-hidden {\n    display: none;\n  }\n  \n  .ao3-blocker-cut {\n    display: none;\n  }\n  \n  .ao3-blocker-cut::after {\n    clear: both;\n    content: '';\n    display: block;\n  }\n  \n  .ao3-blocker-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-blocker-hide-reasons .ao3-blocker-reason {\n    display: none;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-cut {\n    display: block;\n  }\n  \n  .ao3-blocker-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-fold {\n    border-bottom: 1px dashed;\n    margin-bottom: 15px;\n    padding-bottom: 5px;\n  }\n  \n  button.ao3-blocker-toggle {\n    margin-left: auto;\n  }\n";
