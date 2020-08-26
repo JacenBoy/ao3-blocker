@@ -376,12 +376,12 @@
         blocked++;
 
         if (debugMode) {
-          console.groupCollapsed("- blocked " + blurb.attr("id"));
+          console.groupCollapsed(`- blocked ${blurb.attr("id")}`);
           console.log(blurb.html(), reason);
           console.groupEnd();
         }
       } else if (debugMode) {
-        console.groupCollapsed("  skipped " + blurb.attr("id"));
+        console.groupCollapsed(`  skipped ${blurb.attr("id")}`);
         console.log(blurb.html());
         console.groupEnd();
       }
@@ -399,7 +399,7 @@
     }
 
     if (debugMode) {
-      console.log("Blocked " + blocked + " out of " + total + " works");
+      console.log(`Blocked ${blocked} out of ${total} works`);
       console.groupEnd();
     }
   }
