@@ -65,11 +65,11 @@
       }
     },
     "events": {
-      "save": function() {
+      "save": () => {
         window.ao3Blocker.updated = true;
         alert("Your changes have been saved.");
       },
-      "close": function() {
+      "close": () => {
         if (window.ao3Blocker.updated) location.reload();
       }
     },
@@ -137,7 +137,7 @@
   function getCut(work) {
     const cut = $(`<div class="${CSS_NAMESPACE}-cut"></div>`);
 
-    $.makeArray(work.children()).forEach(function (child) {
+    $.makeArray(work.children()).forEach((child) => {
       return cut.append(child);
     });
 
@@ -159,7 +159,7 @@
     const button = $(`<button class="${CSS_NAMESPACE}-toggle"></button>`).text("Unhide");
     const unhideClassFragment = `${CSS_NAMESPACE}-unhide`;
 
-    button.on("click", function (event) {
+    button.on("click", (event) => {
       const work = $(event.target).closest(`.${CSS_NAMESPACE}-work`);
 
       if (work.hasClass(unhideClassFragment)) {
@@ -224,7 +224,7 @@
     if (term === pattern) return true;
     if (pattern.indexOf("*") === -1) return false;
 
-    const lastMatchedIndex = pattern.split("*").filter(Boolean).reduce(function (prevIndex, chunk) {
+    const lastMatchedIndex = pattern.split("*").filter(Boolean).reduce((prevIndex, chunk) => {
       const matchedIndex = term.indexOf(chunk);
       return prevIndex >= 0 && prevIndex <= matchedIndex ? matchedIndex : -1;
     }, 0);
@@ -233,12 +233,12 @@
   }
 
   function isTagWhitelisted(tags, whitelist) {
-    const whitelistLookup = whitelist.reduce(function (lookup, tag) {
+    const whitelistLookup = whitelist.reduce((lookup, tag) => {
       lookup[tag.toLowerCase()] = true;
       return lookup;
     }, {});
 
-    return tags.some(function (tag) {
+    return tags.some((tag) => {
       return !!whitelistLookup[tag.toLowerCase()];
     });
   }
@@ -246,8 +246,8 @@
   function findBlacklistedItem(list, blacklist, comparator) {
     let matchingEntry = void 0;
 
-    list.some(function (item) {
-      blacklist.some(function (entry) {
+    list.some((item) => {
+      blacklist.some((entry) => {
         const matched = comparator(item.toLowerCase(), entry.toLowerCase());
 
         if (matched) matchingEntry = entry;
