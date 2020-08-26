@@ -115,116 +115,94 @@
     dropMenu.append(settingsButton);
   }
 
+  var CSS_NAMESPACE = "ao3-blocker";
+
   function addStyle() {
-    var style = document.createElement("style");
-    var style = $("<style class=\"ao3-blocker\"></style>").html(STYLE);
+    var style = $(`<style class="${CSS_NAMESPACE}"></style>`).html(STYLE);
 
     $("head").append(style);
   }
 
-  var CSS_NAMESPACE = "ao3-blocker";
+  function getCut(work) {
+    var cut = $(`<div class="${CSS_NAMESPACE}-cut"></div>`);
 
-  var getCut = function getCut(work) {
-    var cut = document.createElement("div");
-
-    cut.className = CSS_NAMESPACE + "-cut";
-    Array.from(work.childNodes).forEach(function (child) {
-      return cut.appendChild(child);
+    $.makeArray(work.children()).forEach(function (child) {
+      return cut.append(child);
     });
 
     return cut;
-  };
+  }
 
-  var getFold = function getFold(reason) {
-    var fold = document.createElement("div");
-    var note = document.createElement("span");
+  function getFold(reason) {
+    var fold = $(`<div class="${CSS_NAMESPACE}-fold"></div>`);
+    var note = $(`<span class="${CSS_NAMESPACE}-note"</span>`).text("This work is hidden! ");
 
-    fold.className = CSS_NAMESPACE + "-fold";
-    note.className = CSS_NAMESPACE + "-note";
-
-    note.innerHTML = "This work is hidden!";
-
-    fold.appendChild(note);
-    fold.append(" ");
-    fold.appendChild(getReasonSpan(reason));
-    fold.appendChild(getToggleButton());
+    fold.html(note);
+    fold.append(getReasonSpan(reason));
+    fold.append(getToggleButton());
 
     return fold;
-  };
+  }
 
-  var getToggleButton = function getToggleButton() {
-    var button = document.createElement("button");
-    var unhideClassFragment = " " + CSS_NAMESPACE + "-unhide";
+  function getToggleButton() {
+    var button = $(`<button class="${CSS_NAMESPACE}-toggle"></button>`).text("Unhide");
+    var unhideClassFragment = `${CSS_NAMESPACE}-unhide`;
 
-    button.innerHTML = "Unhide";
-    button.className = CSS_NAMESPACE + "-toggle";
+    button.on("click", function (event) {
+      var work = $(event.target).closest(`.${CSS_NAMESPACE}-work`);
 
-    button.addEventListener("click", function (event) {
-      var work = event.target.closest("." + CSS_NAMESPACE + "-work");
-
-      if (work.className.indexOf(unhideClassFragment) !== -1) {
-        work.className = work.className.replace(unhideClassFragment, "");
-        work.querySelector("." + CSS_NAMESPACE + "-note").innerHTML = "This work is hidden.";
-        event.target.innerHTML = "Unhide";
+      if (work.hasClass(unhideClassFragment)) {
+        work.removeClass(unhideClassFragment);
+        work.find(`.${CSS_NAMESPACE}-note`).text("This work is hidden.");
+        $(event.target).text("Unhide");
       } else {
-        work.className += unhideClassFragment;
-        work.querySelector("." + CSS_NAMESPACE + "-note").innerHTML = "ℹ️ This work was hidden.";
-        event.target.innerHTML = "Hide";
+        work.addClass(unhideClassFragment);
+        work.find(`.${CSS_NAMESPACE}-note`).text("ℹ️ This work was hidden.");
+        $(event.target).text("Hide");
       }
     });
 
     return button;
-  };
+  }
 
-  var getReasonSpan = function getReasonSpan(reason) {
-    var span = document.createElement("span");
-    var tag = reason.tag,
-      author = reason.author,
-      title = reason.title,
-      summary = reason.summary;
+  function getReasonSpan(reason) {
+    var span = $(`<span class="${CSS_NAMESPACE}-reason"></span>`);
 
-    var text = void 0;
+    var text = undefined;
 
-    if (tag) {
-      text = "tags include <strong>" + tag + "</strong>";
-    } else if (author) {
-      text = "authors include <strong>" + author + "</strong>";
-    } else if (title) {
-      text = "title is <strong>" + title + "</strong>";
-    } else if (summary) {
-      text = "summary includes <strong>" + summary + "</strong>";
+    if (reason.tag) {
+      text = `tags include <strong>${reason.tag}</strong>`;
+    } else if (reason.author) {
+      text = `authors include <strong>${reason.author}</strong>`;
+    } else if (reason.title) {
+      text = `title is <strong>${reason.title}</strong>`;
+    } else if (reason.summary) {
+      text = `summary includes <strong>${reason.summary}</strong>`;
     }
 
     if (text) {
-      span.innerHTML = "(Reason: " + text + ".)";
+      span.html(`(Reason: ${text}.)`);
     }
 
-    span.className = CSS_NAMESPACE + "-reason";
-
     return span;
-  };
+  }
 
   function blockWork(work, reason, config) {
     if (!reason) return;
 
-    var showReasons = config.showReasons,
-      showPlaceholders = config.showPlaceholders;
-
-
-    if (showPlaceholders) {
+    if (config.showPlaceholders) {
       var fold = getFold(reason);
       var cut = getCut(work);
 
-      work.className += " " + CSS_NAMESPACE + "-work";
-      work.innerHTML = "";
-      work.appendChild(fold);
-      work.appendChild(cut);
+      work.addClass(`${CSS_NAMESPACE}-work`);
+      work.html(fold);
+      work.append(cut);
 
-      if (!showReasons) {
-        work.className += " " + CSS_NAMESPACE + "-hide-reasons";
+      if (!config.showReasons) {
+        work.addClass(`${CSS_NAMESPACE}-hide-reasons`);
       }
     } else {
-      work.className += " " + CSS_NAMESPACE + "-hidden";
+      work.addClass(`${CSS_NAMESPACE}-hidden`);
     }
   }
 
@@ -243,7 +221,7 @@
     return lastMatchedIndex >= 0;
   }
 
-  var isTagWhitelisted = function isTagWhitelisted(tags, whitelist) {
+  function isTagWhitelisted(tags, whitelist) {
     var whitelistLookup = whitelist.reduce(function (lookup, tag) {
       lookup[tag.toLowerCase()] = true;
       return lookup;
@@ -252,9 +230,9 @@
     return tags.some(function (tag) {
       return !!whitelistLookup[tag.toLowerCase()];
     });
-  };
+  }
 
-  var findBlacklistedItem = function findBlacklistedItem(list, blacklist, comparator) {
+  function findBlacklistedItem(list, blacklist, comparator) {
     var matchingEntry = void 0;
 
     list.some(function (item) {
@@ -268,14 +246,14 @@
     });
 
     return matchingEntry;
-  };
+  }
 
-  var equals = function equals(a, b) {
+  function equals(a, b) {
     return a === b;
-  };
-  var contains = function contains(a, b) {
+  }
+  function contains(a, b) {
     return a.indexOf(b) !== -1;
-  };
+  }
 
   function getBlockReason(_ref, _ref2) {
     var _ref$authors = _ref.authors,
@@ -325,18 +303,14 @@
     return null;
   }
 
-  function isDebug(location) {
-    return location.hostname === "localhost" || /\ba3sv-debug\b/.test(location.search);
-  }
-
   var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-  var getText = function getText(element) {
-    return element.textContent.replace(/^\s*|\s*$/g, "");
-  };
-  var selectTextsIn = function selectTextsIn(root, selector) {
-    return Array.from(root.querySelectorAll(selector)).map(getText);
-  };
+  function getText(element) {
+    return $(element).text().replace(/^\s*|\s*$/g, "");
+  }
+  function selectTextsIn(root, selector) {
+    return $.makeArray($(root).find(selector)).map(getText);
+  }
 
   function selectFromWork(container) {
     return _extends({}, selectFromBlurb(container), {
@@ -354,8 +328,8 @@
     };
   }
 
-  setTimeout(function () {
-    var debugMode = isDebug(window.location);
+  function checkWorks () {
+    var debugMode = false;
     var config = {
       "showReasons": GM_config.get("showReasons"),
       "showPlaceholders": GM_config.get("showPlaceholders"),
@@ -366,7 +340,7 @@
       "tagWhitelist": GM_config.get("tagWhitelist").split(/,(?:\s)?/g).map(i=>i.trim()),
       "summaryBlacklist": GM_config.get("summaryBlacklist").split(/,(?:\s)?/g).map(i=>i.trim())
     };
-    var workContainer = document.querySelector("#main.works-show") || document.querySelector("#main.chapters-show");
+    var workContainer = $("#main.works-show") || $("#main.chapters-show");
     var blocked = 0;
     var total = 0;
 
@@ -383,7 +357,8 @@
 
     addStyle();
 
-    Array.from(document.querySelectorAll("li.blurb")).forEach(function (blurb) {
+    $.makeArray($("li.blurb")).forEach(function (blurb) {
+      blurb = $(blurb);
       var blockables = selectFromBlurb(blurb);
       var reason = getBlockReason(blockables, config);
 
@@ -394,13 +369,13 @@
         blocked++;
 
         if (debugMode) {
-          console.groupCollapsed("- blocked " + blurb.id);
-          console.log(blurb, reason);
+          console.groupCollapsed("- blocked " + blurb.attr("id"));
+          console.log(blurb.html(), reason);
           console.groupEnd();
         }
       } else if (debugMode) {
-        console.groupCollapsed("  skipped " + blurb.id);
-        console.log(blurb);
+        console.groupCollapsed("  skipped " + blurb.attr("id"));
+        console.log(blurb.html());
         console.groupEnd();
       }
     });
@@ -420,6 +395,8 @@
       console.log("Blocked " + blocked + " out of " + total + " works");
       console.groupEnd();
     }
-  }, 10);
+  }
+
+  setTimeout(checkWorks, 10);
 
 }());
