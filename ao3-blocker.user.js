@@ -5,7 +5,7 @@
 // @namespace     https://github.com/JacenBoy/ao3-blocker#readme
 // @license       Apache-2.0; http://www.apache.org/licenses/LICENSE-2.0
 // @include       http*://archiveofourown.org/*
-// @version       2.1
+// @version       2.2
 // @require       https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js
 // @grant         GM_getValue
@@ -19,6 +19,7 @@
   "use strict";
   window.ao3Blocker = {};
 
+  // Initialize GM_config options
   GM_config.init({
     "id": "ao3Blocker",
     "title": "AO3 Blocker",
@@ -76,15 +77,19 @@
     "css": ".config_var {display: grid; grid-template-columns: repeat(2, 0.7fr);}"
   });
 
+  // Define the custom styles for the script
   const STYLE = "\n  html body .ao3-blocker-hidden {\n    display: none;\n  }\n  \n  .ao3-blocker-cut {\n    display: none;\n  }\n  \n  .ao3-blocker-cut::after {\n    clear: both;\n    content: '';\n    display: block;\n  }\n  \n  .ao3-blocker-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-blocker-hide-reasons .ao3-blocker-reason {\n    display: none;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-cut {\n    display: block;\n  }\n  \n  .ao3-blocker-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-fold {\n    border-bottom: 1px dashed;\n    margin-bottom: 15px;\n    padding-bottom: 5px;\n  }\n  \n  button.ao3-blocker-toggle {\n    margin-left: auto;\n  }\n";
 
+  // addMenu() - Add a custom menu to the AO3 menu bar to control our configuration options
   function addMenu() {
+    // Define our custom menu and add it to the AO3 menu bar
     const headerMenu = $("ul.primary.navigation.actions");
     const blockerMenu = $("<li class=\"dropdown\"></li>").html("<a>AO3 Blocker</a>");
     headerMenu.find("li.search").before(blockerMenu);
     const dropMenu = $("<ul class=\"menu dropdown-menu\"></ul>");
     blockerMenu.append(dropMenu);
 
+    // Add the "Toggle Block Reason" option to the menu
     const reasonButton = $("<li></li>").html(`<a>${GM_config.get("showReasons") ? "Hide" : "Show"} Block Reason</a>`);
     reasonButton.on("click", () => {
       if (GM_config.get("showReasons")) {
@@ -97,6 +102,7 @@
     });
     dropMenu.append(reasonButton);
 
+    // Add the "Toggle Work Placeholder" option to the menu
     const placeholderButton = $("<li></li>").html(`<a>${GM_config.get("showPlaceholders") ? "Hide" : "Show"} Work Placeholder</a>`);
     placeholderButton.on("click", () => {
       if (GM_config.get("showPlaceholders")) {
@@ -109,6 +115,7 @@
     });
     dropMenu.append(placeholderButton);
 
+    // Add the "Toggle Block Alerts" option to the menu
     const alertButton = $("<li></li>").html(`<a>${GM_config.get("alertOnVisit") ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
     alertButton.on("click", () => {
       if (GM_config.get("alertOnVisit")) {
@@ -121,19 +128,23 @@
     });
     dropMenu.append(alertButton);
 
+    // Add an option to show the config dialog
     const settingsButton = $("<li></li>").html("<a>All Settings</a>");
     settingsButton.on("click", () => {GM_config.open();});
     dropMenu.append(settingsButton);
   }
 
+  // Define the CSS namespace. All CSS classes are prefixed with this.
   const CSS_NAMESPACE = "ao3-blocker";
 
+  // addStyle() - Apply the custom stylesheet to AO3
   function addStyle() {
     const style = $(`<style class="${CSS_NAMESPACE}"></style>`).html(STYLE);
 
     $("head").append(style);
   }
 
+  // getCut(work) - Move standard AO3 work information (tags, summary, etc.) to a custom element for blocked works. This will be hidden by default on blocked works but can be shown if thre user chooses.
   function getCut(work) {
     const cut = $(`<div class="${CSS_NAMESPACE}-cut"></div>`);
 
@@ -144,6 +155,7 @@
     return cut;
   }
 
+  // getFold(reason) - Create the work placeholder for blocked works. Optionally, this will show why the work was blocked and give the user the option to unhide it.
   function getFold(reason) {
     const fold = $(`<div class="${CSS_NAMESPACE}-fold"></div>`);
     const note = $(`<span class="${CSS_NAMESPACE}-note"</span>`).text("This work is hidden! ");
@@ -155,6 +167,7 @@
     return fold;
   }
 
+  // getToggleButton() - Create a button that will show or hide the "cut" on blocked works.
   function getToggleButton() {
     const button = $(`<button class="${CSS_NAMESPACE}-toggle"></button>`).text("Unhide");
     const unhideClassFragment = `${CSS_NAMESPACE}-unhide`;
@@ -176,6 +189,7 @@
     return button;
   }
 
+  // getReasonSpan(reason) - Create the element that holds the block reason information on blocked works.
   function getReasonSpan(reason) {
     const span = $(`<span class="${CSS_NAMESPACE}-reason"></span>`);
 
@@ -198,6 +212,7 @@
     return span;
   }
 
+  // blockWork(work, reason, config) - Replace the standard AO3 work information with the placeholder "fold", and place the "cut" below it, hidden.
   function blockWork(work, reason, config) {
     if (!reason) return;
 
@@ -339,8 +354,10 @@
     };
   }
 
+  // checkWorks() - Scan all works on the page and block them if they match one of the conditions set by the user.
   function checkWorks () {
-    const debugMode = false;
+    const debugMode = false; // Set to true to enable extra logging
+    // Load our config information into a convenient JSON file.
     const config = {
       "showReasons": GM_config.get("showReasons"),
       "showPlaceholders": GM_config.get("showPlaceholders"),
@@ -351,6 +368,7 @@
       "tagWhitelist": GM_config.get("tagWhitelist").split(/,(?:\s)?/g).map(i=>i.trim()),
       "summaryBlacklist": GM_config.get("summaryBlacklist").split(/,(?:\s)?/g).map(i=>i.trim())
     };
+    // If this is a work page, save the element for future use.
     const workContainer = $("#main.works-show") || $("#main.chapters-show");
     let blocked = 0;
     let total = 0;
@@ -364,7 +382,8 @@
       }
     }
 
-    $.makeArray($("li.blurb")).forEach(function (blurb) {
+    // Loop through all works on the search page and check if they match one of the conditions.
+    $.makeArray($("li.blurb")).forEach((blurb) => {
       blurb = $(blurb);
       const blockables = selectFromBlurb(blurb);
       const reason = getBlockReason(blockables, config);
@@ -387,6 +406,7 @@
       }
     });
 
+    // If this is a work page, the work was navigated to from another site (i.e. an external link), and the user had block alerts enabled, show a warning.
     if (config.alertOnVisit && workContainer && document.referrer.indexOf("//archiveofourown.org") === -1) {
 
       const blockables = selectFromWork(workContainer);
