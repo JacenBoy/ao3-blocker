@@ -76,16 +76,16 @@
     "css": ".config_var {display: grid; grid-template-columns: repeat(2, 0.7fr);}"
   });
 
-  var STYLE = "\n  html body .ao3-blocker-hidden {\n    display: none;\n  }\n  \n  .ao3-blocker-cut {\n    display: none;\n  }\n  \n  .ao3-blocker-cut::after {\n    clear: both;\n    content: '';\n    display: block;\n  }\n  \n  .ao3-blocker-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-blocker-hide-reasons .ao3-blocker-reason {\n    display: none;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-cut {\n    display: block;\n  }\n  \n  .ao3-blocker-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-fold {\n    border-bottom: 1px dashed;\n    margin-bottom: 15px;\n    padding-bottom: 5px;\n  }\n  \n  button.ao3-blocker-toggle {\n    margin-left: auto;\n  }\n";
+  const STYLE = "\n  html body .ao3-blocker-hidden {\n    display: none;\n  }\n  \n  .ao3-blocker-cut {\n    display: none;\n  }\n  \n  .ao3-blocker-cut::after {\n    clear: both;\n    content: '';\n    display: block;\n  }\n  \n  .ao3-blocker-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-blocker-hide-reasons .ao3-blocker-reason {\n    display: none;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-cut {\n    display: block;\n  }\n  \n  .ao3-blocker-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-blocker-unhide .ao3-blocker-fold {\n    border-bottom: 1px dashed;\n    margin-bottom: 15px;\n    padding-bottom: 5px;\n  }\n  \n  button.ao3-blocker-toggle {\n    margin-left: auto;\n  }\n";
 
   function addMenu() {
-    var headerMenu = $("ul.primary.navigation.actions");
-    var blockerMenu = $("<li class=\"dropdown\"></li>").html("<a>AO3 Blocker</a>");
+    const headerMenu = $("ul.primary.navigation.actions");
+    const blockerMenu = $("<li class=\"dropdown\"></li>").html("<a>AO3 Blocker</a>");
     headerMenu.find("li.search").before(blockerMenu);
-    var dropMenu = $("<ul class=\"menu dropdown-menu\"></ul>");
+    const dropMenu = $("<ul class=\"menu dropdown-menu\"></ul>");
     blockerMenu.append(dropMenu);
 
-    var reasonButton = $("<li></li>").html(`<a>${GM_config.get("showReasons") ? "Hide" : "Show"} Block Reason</a>`);
+    const reasonButton = $("<li></li>").html(`<a>${GM_config.get("showReasons") ? "Hide" : "Show"} Block Reason</a>`);
     reasonButton.on("click", () => {
       if (GM_config.get("showReasons")) {
         GM_config.set("showReasons", false);
@@ -97,7 +97,7 @@
     });
     dropMenu.append(reasonButton);
 
-    var placeholderButton = $("<li></li>").html(`<a>${GM_config.get("showPlaceholders") ? "Hide" : "Show"} Work Placeholder</a>`);
+    const placeholderButton = $("<li></li>").html(`<a>${GM_config.get("showPlaceholders") ? "Hide" : "Show"} Work Placeholder</a>`);
     placeholderButton.on("click", () => {
       if (GM_config.get("showPlaceholders")) {
         GM_config.set("showPlaceholders", false);
@@ -109,7 +109,7 @@
     });
     dropMenu.append(placeholderButton);
 
-    var alertButton = $("<li></li>").html(`<a>${GM_config.get("alertOnVisit") ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
+    const alertButton = $("<li></li>").html(`<a>${GM_config.get("alertOnVisit") ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
     alertButton.on("click", () => {
       if (GM_config.get("alertOnVisit")) {
         GM_config.set("alertOnVisit", false);
@@ -121,21 +121,21 @@
     });
     dropMenu.append(alertButton);
 
-    var settingsButton = $("<li></li>").html("<a>All Settings</a>");
+    const settingsButton = $("<li></li>").html("<a>All Settings</a>");
     settingsButton.on("click", () => {GM_config.open();});
     dropMenu.append(settingsButton);
   }
 
-  var CSS_NAMESPACE = "ao3-blocker";
+  const CSS_NAMESPACE = "ao3-blocker";
 
   function addStyle() {
-    var style = $(`<style class="${CSS_NAMESPACE}"></style>`).html(STYLE);
+    const style = $(`<style class="${CSS_NAMESPACE}"></style>`).html(STYLE);
 
     $("head").append(style);
   }
 
   function getCut(work) {
-    var cut = $(`<div class="${CSS_NAMESPACE}-cut"></div>`);
+    const cut = $(`<div class="${CSS_NAMESPACE}-cut"></div>`);
 
     $.makeArray(work.children()).forEach(function (child) {
       return cut.append(child);
@@ -145,8 +145,8 @@
   }
 
   function getFold(reason) {
-    var fold = $(`<div class="${CSS_NAMESPACE}-fold"></div>`);
-    var note = $(`<span class="${CSS_NAMESPACE}-note"</span>`).text("This work is hidden! ");
+    const fold = $(`<div class="${CSS_NAMESPACE}-fold"></div>`);
+    const note = $(`<span class="${CSS_NAMESPACE}-note"</span>`).text("This work is hidden! ");
 
     fold.html(note);
     fold.append(getReasonSpan(reason));
@@ -156,11 +156,11 @@
   }
 
   function getToggleButton() {
-    var button = $(`<button class="${CSS_NAMESPACE}-toggle"></button>`).text("Unhide");
-    var unhideClassFragment = `${CSS_NAMESPACE}-unhide`;
+    const button = $(`<button class="${CSS_NAMESPACE}-toggle"></button>`).text("Unhide");
+    const unhideClassFragment = `${CSS_NAMESPACE}-unhide`;
 
     button.on("click", function (event) {
-      var work = $(event.target).closest(`.${CSS_NAMESPACE}-work`);
+      const work = $(event.target).closest(`.${CSS_NAMESPACE}-work`);
 
       if (work.hasClass(unhideClassFragment)) {
         work.removeClass(unhideClassFragment);
@@ -177,9 +177,9 @@
   }
 
   function getReasonSpan(reason) {
-    var span = $(`<span class="${CSS_NAMESPACE}-reason"></span>`);
+    const span = $(`<span class="${CSS_NAMESPACE}-reason"></span>`);
 
-    var text = undefined;
+    let text = undefined;
 
     if (reason.tag) {
       text = `tags include <strong>${reason.tag}</strong>`;
@@ -202,8 +202,8 @@
     if (!reason) return;
 
     if (config.showPlaceholders) {
-      var fold = getFold(reason);
-      var cut = getCut(work);
+      const fold = getFold(reason);
+      const cut = getCut(work);
 
       work.addClass(`${CSS_NAMESPACE}-work`);
       work.html(fold);
@@ -218,14 +218,14 @@
   }
 
   function matchTermsWithWildCard(term0, pattern0) {
-    var term = term0.toLowerCase();
-    var pattern = pattern0.toLowerCase();
+    const term = term0.toLowerCase();
+    const pattern = pattern0.toLowerCase();
 
     if (term === pattern) return true;
     if (pattern.indexOf("*") === -1) return false;
 
-    var lastMatchedIndex = pattern.split("*").filter(Boolean).reduce(function (prevIndex, chunk) {
-      var matchedIndex = term.indexOf(chunk);
+    const lastMatchedIndex = pattern.split("*").filter(Boolean).reduce(function (prevIndex, chunk) {
+      const matchedIndex = term.indexOf(chunk);
       return prevIndex >= 0 && prevIndex <= matchedIndex ? matchedIndex : -1;
     }, 0);
 
@@ -233,7 +233,7 @@
   }
 
   function isTagWhitelisted(tags, whitelist) {
-    var whitelistLookup = whitelist.reduce(function (lookup, tag) {
+    const whitelistLookup = whitelist.reduce(function (lookup, tag) {
       lookup[tag.toLowerCase()] = true;
       return lookup;
     }, {});
@@ -244,11 +244,11 @@
   }
 
   function findBlacklistedItem(list, blacklist, comparator) {
-    var matchingEntry = void 0;
+    let matchingEntry = void 0;
 
     list.some(function (item) {
       blacklist.some(function (entry) {
-        var matched = comparator(item.toLowerCase(), entry.toLowerCase());
+        const matched = comparator(item.toLowerCase(), entry.toLowerCase());
 
         if (matched) matchingEntry = entry;
 
@@ -267,7 +267,7 @@
   }
 
   function getBlockReason(_ref, _ref2) {
-    var _ref$authors = _ref.authors,
+    const _ref$authors = _ref.authors,
       authors = _ref$authors === undefined ? [] : _ref$authors,
       _ref$title = _ref.title,
       title = _ref$title === undefined ? "" : _ref$title,
@@ -275,7 +275,7 @@
       tags = _ref$tags === undefined ? [] : _ref$tags,
       _ref$summary = _ref.summary,
       summary = _ref$summary === undefined ? "" : _ref$summary;
-    var _ref2$authorBlacklist = _ref2.authorBlacklist,
+    const _ref2$authorBlacklist = _ref2.authorBlacklist,
       authorBlacklist = _ref2$authorBlacklist === undefined ? [] : _ref2$authorBlacklist,
       _ref2$titleBlacklist = _ref2.titleBlacklist,
       titleBlacklist = _ref2$titleBlacklist === undefined ? [] : _ref2$titleBlacklist,
@@ -291,22 +291,22 @@
       return null;
     }
 
-    var blockedTag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
+    const blockedTag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
     if (blockedTag) {
       return { tag: blockedTag };
     }
 
-    var author = findBlacklistedItem(authors, authorBlacklist, equals);
+    const author = findBlacklistedItem(authors, authorBlacklist, equals);
     if (author) {
       return { author: author };
     }
 
-    var blockedTitle = findBlacklistedItem([title.toLowerCase()], titleBlacklist, matchTermsWithWildCard);
+    const blockedTitle = findBlacklistedItem([title.toLowerCase()], titleBlacklist, matchTermsWithWildCard);
     if (blockedTitle) {
       return { title: blockedTitle };
     }
 
-    var summaryTerm = findBlacklistedItem([summary.toLowerCase()], summaryBlacklist, contains);
+    const summaryTerm = findBlacklistedItem([summary.toLowerCase()], summaryBlacklist, contains);
     if (summaryTerm) {
       return { summary: summaryTerm };
     }
@@ -314,7 +314,7 @@
     return null;
   }
 
-  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+  const _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
   function getText(element) {
     return $(element).text().replace(/^\s*|\s*$/g, "");
@@ -340,8 +340,8 @@
   }
 
   function checkWorks () {
-    var debugMode = false;
-    var config = {
+    const debugMode = false;
+    const config = {
       "showReasons": GM_config.get("showReasons"),
       "showPlaceholders": GM_config.get("showPlaceholders"),
       "alertOnVisit": GM_config.get("alertOnVisit"),
@@ -351,9 +351,9 @@
       "tagWhitelist": GM_config.get("tagWhitelist").split(/,(?:\s)?/g).map(i=>i.trim()),
       "summaryBlacklist": GM_config.get("summaryBlacklist").split(/,(?:\s)?/g).map(i=>i.trim())
     };
-    var workContainer = $("#main.works-show") || $("#main.chapters-show");
-    var blocked = 0;
-    var total = 0;
+    const workContainer = $("#main.works-show") || $("#main.chapters-show");
+    let blocked = 0;
+    let total = 0;
 
     if (debugMode) {
       console.groupCollapsed("AO3 BLOCKER");
@@ -364,14 +364,10 @@
       }
     }
 
-    addMenu();
-
-    addStyle();
-
     $.makeArray($("li.blurb")).forEach(function (blurb) {
       blurb = $(blurb);
-      var blockables = selectFromBlurb(blurb);
-      var reason = getBlockReason(blockables, config);
+      const blockables = selectFromBlurb(blurb);
+      const reason = getBlockReason(blockables, config);
 
       total++;
 
@@ -393,8 +389,8 @@
 
     if (config.alertOnVisit && workContainer && document.referrer.indexOf("//archiveofourown.org") === -1) {
 
-      var blockables = selectFromWork(workContainer);
-      var reason = getBlockReason(blockables, config);
+      const blockables = selectFromWork(workContainer);
+      const reason = getBlockReason(blockables, config);
 
       if (reason) {
         blocked++;
@@ -408,6 +404,8 @@
     }
   }
 
+  addMenu();
+  addStyle();
   setTimeout(checkWorks, 10);
 
 }());
