@@ -11,6 +11,5 @@ This userscript is a fork of [ao3 savior](https://greasyfork.org/en/scripts/3579
 - Tags, titles, and terms with commas cannot be filtered.
 
 ## TODOs
-- Finsh transitioning to JQuery
 - Make the settings page look better
 - Fix commas issue
