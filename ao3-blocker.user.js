@@ -13,7 +13,7 @@
 // @run-at        document-end
 // ==/UserScript==
 
-
+/* globals $, GM_config */
 
 (function () {
   "use strict";
