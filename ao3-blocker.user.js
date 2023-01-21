@@ -367,12 +367,12 @@
       "showReasons": GM_config.get("showReasons"),
       "showPlaceholders": GM_config.get("showPlaceholders"),
       "alertOnVisit": GM_config.get("alertOnVisit"),
-      "authorBlacklist": GM_config.get("authorBlacklist").split(/,(?:\s)?/g).map(i=>i.trim()),
-      "titleBlacklist": GM_config.get("titleBlacklist").split(/,(?:\s)?/g).map(i=>i.trim()),
-      "tagBlacklist": GM_config.get("tagBlacklist").split(/,(?:\s)?/g).map(i=>i.trim()),
-      "tagWhitelist": GM_config.get("tagWhitelist").split(/,(?:\s)?/g).map(i=>i.trim()),
-      "tagHighlights": GM_config.get("tagHighlights").split(/,(?:\s)?/g).map(i=>i.trim()),
-      "summaryBlacklist": GM_config.get("summaryBlacklist").split(/,(?:\s)?/g).map(i=>i.trim())
+      "authorBlacklist": GM_config.get("authorBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
+      "titleBlacklist": GM_config.get("titleBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
+      "tagBlacklist": GM_config.get("tagBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
+      "tagWhitelist": GM_config.get("tagWhitelist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
+      "tagHighlights": GM_config.get("tagHighlights").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
+      "summaryBlacklist": GM_config.get("summaryBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim())
     };
     // If this is a work page, save the element for future use.
     const workContainer = $("#main.works-show") || $("#main.chapters-show");
