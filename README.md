@@ -1,4 +1,4 @@
-# ao3-blocker
+# AO3 Blocker
 A userscript to block works on [AO3](https://archiveofourown.org/) based on various conditions. A fork of [ao3 savior](https://greasyfork.org/en/scripts/3579-ao3-savior)
 
 ## What does this script do?
