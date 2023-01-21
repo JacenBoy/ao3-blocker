@@ -34,6 +34,11 @@
         "type": "text",
         "default": ""
       },
+      "tagHighlights": {
+        "label": "Highlighted Tags",
+        "type": "text",
+        "default": ""
+      },
       "authorBlacklist": {
         "label": "Author Blacklist",
         "type": "text",
@@ -366,6 +371,7 @@
       "titleBlacklist": GM_config.get("titleBlacklist").split(/,(?:\s)?/g).map(i=>i.trim()),
       "tagBlacklist": GM_config.get("tagBlacklist").split(/,(?:\s)?/g).map(i=>i.trim()),
       "tagWhitelist": GM_config.get("tagWhitelist").split(/,(?:\s)?/g).map(i=>i.trim()),
+      "tagHighlights": GM_config.get("tagHighlights").split(/,(?:\s)?/g).map(i=>i.trim()),
       "summaryBlacklist": GM_config.get("summaryBlacklist").split(/,(?:\s)?/g).map(i=>i.trim())
     };
     // If this is a work page, save the element for future use.
