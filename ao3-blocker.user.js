@@ -6,7 +6,7 @@
 // @license       Apache-2.0; http://www.apache.org/licenses/LICENSE-2.0
 // @match         http*://archiveofourown.org/*
 // @version       2.4
-// @require       https://raw.githubusercontent.com/sizzlemctwizzle/GM_config/2207c5c1322ebb56e401f03c2e581719f909762a/gm_config.js
+// @require       https://cdn.jsdelivr.net/gh/sizzlemctwizzle/GM_config@2207c5c1322ebb56e401f03c2e581719f909762a/gm_config.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js
 // @grant         GM_getValue
 // @grant         GM_setValue
