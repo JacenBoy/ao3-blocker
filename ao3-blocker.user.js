@@ -6,10 +6,10 @@
 // @license       Apache-2.0; http://www.apache.org/licenses/LICENSE-2.0
 // @match         http*://archiveofourown.org/*
 // @version       2.4
-// @require       https://cdn.jsdelivr.net/gh/sizzlemctwizzle/GM_config@2207c5c1322ebb56e401f03c2e581719f909762a/gm_config.js
+// @require       https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js
-// @grant         GM_getValue
-// @grant         GM_setValue
+// @grant         GM.getValue
+// @grant         GM.setValue
 // @run-at        document-end
 // ==/UserScript==
 
@@ -68,6 +68,11 @@
         "label": "Alert When Opening Blocked Work",
         "type": "checkbox",
         "default": false
+      },
+      "debugMode": {
+        "label": "Debug Mode",
+        "type": "checkbox",
+        "default": false
       }
     },
     "events": {
@@ -77,6 +82,25 @@
       },
       "close": () => {
         if (window.ao3Blocker.updated) location.reload();
+      },
+      "init": () => {
+        // Config is now available
+        window.ao3Blocker.config = {
+          "showReasons": GM_config.get("showReasons"),
+          "showPlaceholders": GM_config.get("showPlaceholders"),
+          "alertOnVisit": GM_config.get("alertOnVisit"),
+          "authorBlacklist": GM_config.get("authorBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i => i.trim()),
+          "titleBlacklist": GM_config.get("titleBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i => i.trim()),
+          "tagBlacklist": GM_config.get("tagBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i => i.trim()),
+          "tagWhitelist": GM_config.get("tagWhitelist").toLowerCase().split(/,(?:\s)?/g).map(i => i.trim()),
+          "tagHighlights": GM_config.get("tagHighlights").toLowerCase().split(/,(?:\s)?/g).map(i => i.trim()),
+          "summaryBlacklist": GM_config.get("summaryBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i => i.trim()),
+          "debugMode": GM_config.get("debugMode")
+        }
+
+        addMenu();
+        addStyle();
+        setTimeout(checkWorks, 10);
       }
     },
     "css": ".config_var {display: grid; grid-template-columns: repeat(2, 0.7fr);}"
@@ -95,47 +119,47 @@
     blockerMenu.append(dropMenu);
 
     // Add the "Toggle Block Reason" option to the menu
-    const reasonButton = $("<li></li>").html(`<a>${GM_config.get("showReasons") ? "Hide" : "Show"} Block Reason</a>`);
+    const reasonButton = $("<li></li>").html(`<a>${window.ao3Blocker.config.showReasons ? "Hide" : "Show"} Block Reason</a>`);
     reasonButton.on("click", () => {
-      if (GM_config.get("showReasons")) {
+      if (window.ao3Blocker.config.showReasons) {
         GM_config.set("showReasons", false);
       } else {
         GM_config.set("showReasons", true);
       }
       GM_config.save();
-      reasonButton.html(`<a>${GM_config.get("showReasons") ? "Hide" : "Show"} Block Reason</a>`);
+      reasonButton.html(`<a>${window.ao3Blocker.config.showReasons ? "Hide" : "Show"} Block Reason</a>`);
     });
     dropMenu.append(reasonButton);
 
     // Add the "Toggle Work Placeholder" option to the menu
-    const placeholderButton = $("<li></li>").html(`<a>${GM_config.get("showPlaceholders") ? "Hide" : "Show"} Work Placeholder</a>`);
+    const placeholderButton = $("<li></li>").html(`<a>${window.ao3Blocker.config.showPlaceholders ? "Hide" : "Show"} Work Placeholder</a>`);
     placeholderButton.on("click", () => {
-      if (GM_config.get("showPlaceholders")) {
+      if (window.ao3Blocker.config.showPlaceholders) {
         GM_config.set("showPlaceholders", false);
       } else {
         GM_config.set("showPlaceholders", true);
       }
       GM_config.save();
-      placeholderButton.html(`<a>${GM_config.get("showPlaceholders") ? "Hide" : "Show"} Work Placeholder</a>`);
+      placeholderButton.html(`<a>${window.ao3Blocker.config.showPlaceholders ? "Hide" : "Show"} Work Placeholder</a>`);
     });
     dropMenu.append(placeholderButton);
 
     // Add the "Toggle Block Alerts" option to the menu
-    const alertButton = $("<li></li>").html(`<a>${GM_config.get("alertOnVisit") ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
+    const alertButton = $("<li></li>").html(`<a>${window.ao3Blocker.config.alertOnVisit ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
     alertButton.on("click", () => {
-      if (GM_config.get("alertOnVisit")) {
+      if (window.ao3Blocker.config.alertOnVisit) {
         GM_config.set("alertOnVisit", false);
       } else {
         GM_config.set("alertOnVisit", true);
       }
       GM_config.save();
-      alertButton.html(`<a>${GM_config.get("alertOnVisit") ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
+      alertButton.html(`<a>${window.ao3Blocker.config.alertOnVisit ? "Don't Show" : "Show"} Blocked Work Alerts</a>`);
     });
     dropMenu.append(alertButton);
 
     // Add an option to show the config dialog
     const settingsButton = $("<li></li>").html("<a>All Settings</a>");
-    settingsButton.on("click", () => {GM_config.open();});
+    settingsButton.on("click", () => { GM_config.open(); });
     dropMenu.append(settingsButton);
   }
 
@@ -360,20 +384,10 @@
   }
 
   // checkWorks() - Scan all works on the page and block them if they match one of the conditions set by the user.
-  function checkWorks () {
-    const debugMode = false; // Set to true to enable extra logging
-    // Load our config information into a convenient JSON file.
-    const config = {
-      "showReasons": GM_config.get("showReasons"),
-      "showPlaceholders": GM_config.get("showPlaceholders"),
-      "alertOnVisit": GM_config.get("alertOnVisit"),
-      "authorBlacklist": GM_config.get("authorBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
-      "titleBlacklist": GM_config.get("titleBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
-      "tagBlacklist": GM_config.get("tagBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
-      "tagWhitelist": GM_config.get("tagWhitelist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
-      "tagHighlights": GM_config.get("tagHighlights").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim()),
-      "summaryBlacklist": GM_config.get("summaryBlacklist").toLowerCase().split(/,(?:\s)?/g).map(i=>i.trim())
-    };
+  function checkWorks() {
+    const debugMode = window.ao3Blocker.config.debugMode;
+
+    const config = window.ao3Blocker.config;
     // If this is a work page, save the element for future use.
     const workContainer = $("#main.works-show") || $("#main.chapters-show");
     let blocked = 0;
@@ -442,9 +456,4 @@
       console.groupEnd();
     }
   }
-
-  addMenu();
-  addStyle();
-  setTimeout(checkWorks, 10);
-
 }());
