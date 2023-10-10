@@ -425,18 +425,16 @@
         console.groupEnd();
       }
 
-      if (!reason) {
-        blockables.tags.forEach((tag) => {
-          if (config.tagHighlights.includes(tag.toLowerCase())) {
-            blurb.css("background-color", "rgba(255,255,0,0.1)");
-            if (debugMode) {
-              console.groupCollapsed(`? highlighted ${blurb.attr("id")}`);
-              console.log(blurb.html());
-              console.groupEnd();
-            }
+      blockables.tags.forEach((tag) => {
+        if (config.tagHighlights.includes(tag.toLowerCase())) {
+          blurb.css("background-color", "rgba(255,255,0,0.1)");
+          if (debugMode) {
+            console.groupCollapsed(`? highlighted ${blurb.attr("id")}`);
+            console.log(blurb.html());
+            console.groupEnd();
           }
-        });
-      }
+        }
+      });
     });
 
     // If this is a work page, the work was navigated to from another site (i.e. an external link), and the user had block alerts enabled, show a warning.
