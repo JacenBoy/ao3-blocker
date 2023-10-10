@@ -5,7 +5,7 @@
 // @namespace     https://github.com/JacenBoy/ao3-blocker#readme
 // @license       Apache-2.0; http://www.apache.org/licenses/LICENSE-2.0
 // @match         http*://archiveofourown.org/*
-// @version       2.4
+// @version       3.0
 // @require       https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js
 // @grant         GM.getValue
