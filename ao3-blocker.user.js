@@ -5,7 +5,7 @@
 // @namespace     https://github.com/JacenBoy/ao3-blocker#readme
 // @license       Apache-2.0; http://www.apache.org/licenses/LICENSE-2.0
 // @match         http*://archiveofourown.org/*
-// @version       3.0
+// @version       3.1
 // @require       https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js
 // @grant         GM.getValue
@@ -185,12 +185,12 @@
   }
 
   // getFold(reason) - Create the work placeholder for blocked works. Optionally, this will show why the work was blocked and give the user the option to unhide it.
-  function getFold(reason) {
+  function getFold(reasons) {
     const fold = $(`<div class="${CSS_NAMESPACE}-fold"></div>`);
     const note = $(`<span class="${CSS_NAMESPACE}-note"</span>`).text("This work is hidden! ");
 
     fold.html(note);
-    fold.append(getReasonSpan(reason));
+    fold.append(getReasonSpan(reasons));
     fold.append(getToggleButton());
 
     return fold;
@@ -219,34 +219,68 @@
   }
 
   // getReasonSpan(reason) - Create the element that holds the block reason information on blocked works.
-  function getReasonSpan(reason) {
+  function getReasonSpan(reasons) {
     const span = $(`<span class="${CSS_NAMESPACE}-reason"></span>`);
 
-    let text = undefined;
-
-    if (reason.tag) {
-      text = `tags include <strong>${reason.tag}</strong>`;
-    } else if (reason.author) {
-      text = `authors include <strong>${reason.author}</strong>`;
-    } else if (reason.title) {
-      text = `title is <strong>${reason.title}</strong>`;
-    } else if (reason.summary) {
-      text = `summary includes <strong>${reason.summary}</strong>`;
+    if (!reasons || reasons.length === 0) {
+      return span;
     }
 
-    if (text) {
-      span.html(`(Reason: ${text}.)`);
+    const reasonTexts = [];
+
+    reasons.forEach((reason) => {
+      if (reason.tags) {
+        if (reason.tags.length === 1) {
+          reasonTexts.push(`tags include <strong>${reason.tags[0]}</strong>`);
+        } else {
+          const tagList = reason.tags.map(tag => `<strong>${tag}</strong>`).join(', ');
+          reasonTexts.push(`tags include ${tagList}`);
+        }
+      }
+      
+      if (reason.authors) {
+        if (reason.authors.length === 1) {
+          reasonTexts.push(`author is <strong>${reason.authors[0]}</strong>`);
+        } else {
+          const authorList = reason.authors.map(author => `<strong>${author}</strong>`).join(', ');
+          reasonTexts.push(`authors include ${authorList}`);
+        }
+      }
+      
+      if (reason.titles) {
+        if (reason.titles.length === 1) {
+          reasonTexts.push(`title matches <strong>${reason.titles[0]}</strong>`);
+        } else {
+          const titleList = reason.titles.map(title => `<strong>${title}</strong>`).join(', ');
+          reasonTexts.push(`title matches ${titleList}`);
+        }
+      }
+      
+      if (reason.summaryTerms) {
+        if (reason.summaryTerms.length === 1) {
+          reasonTexts.push(`summary includes <strong>${reason.summaryTerms[0]}</strong>`);
+        } else {
+          const termList = reason.summaryTerms.map(term => `<strong>${term}</strong>`).join(', ');
+          reasonTexts.push(`summary includes ${termList}`);
+        }
+      }
+    });
+
+    if (reasonTexts.length > 0) {
+      // Join multiple reasons with semicolons for better readability
+      const reasonText = reasonTexts.join('; ');
+      span.html(`(Reason: ${reasonText}.)`);
     }
 
     return span;
   }
 
   // blockWork(work, reason, config) - Replace the standard AO3 work information with the placeholder "fold", and place the "cut" below it, hidden.
-  function blockWork(work, reason, config) {
-    if (!reason) return;
+  function blockWork(work, reasons, config) {
+    if (!reasons) return;
 
     if (config.showPlaceholders) {
-      const fold = getFold(reason);
+      const fold = getFold(reasons);
       const cut = getCut(work);
 
       work.addClass(`${CSS_NAMESPACE}-work`);
@@ -330,32 +364,66 @@
       _ref2$summaryBlacklis = _ref2.summaryBlacklist,
       summaryBlacklist = _ref2$summaryBlacklis === undefined ? [] : _ref2$summaryBlacklis;
 
-
+    // If whitelisted, don't block regardless of other conditions
     if (isTagWhitelisted(tags, tagWhitelist)) {
       return null;
     }
 
-    const blockedTag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
-    if (blockedTag) {
-      return { tag: blockedTag };
+    const reasons = [];
+
+    // Check for blocked tags (collect all matching tags)
+    const blockedTags = [];
+    tags.forEach((tag) => {
+      tagBlacklist.forEach((blacklistedTag) => {
+        // Skip empty or whitespace-only terms
+        if (blacklistedTag.trim() && matchTermsWithWildCard(tag.toLowerCase(), blacklistedTag.toLowerCase())) {
+          blockedTags.push(blacklistedTag);
+        }
+      });
+    });
+    if (blockedTags.length > 0) {
+      reasons.push({ tags: blockedTags });
     }
 
-    const author = findBlacklistedItem(authors, authorBlacklist, equals);
-    if (author) {
-      return { author: author };
+    // Check for blocked authors (collect all matching authors)
+    const blockedAuthors = [];
+    authors.forEach((author) => {
+      authorBlacklist.forEach((blacklistedAuthor) => {
+        // Skip empty or whitespace-only terms
+        if (blacklistedAuthor.trim() && author.toLowerCase() === blacklistedAuthor.toLowerCase()) {
+          blockedAuthors.push(blacklistedAuthor);
+        }
+      });
+    });
+    if (blockedAuthors.length > 0) {
+      reasons.push({ authors: blockedAuthors });
     }
 
-    const blockedTitle = findBlacklistedItem([title.toLowerCase()], titleBlacklist, matchTermsWithWildCard);
-    if (blockedTitle) {
-      return { title: blockedTitle };
+    // Check for blocked title
+    const blockedTitles = [];
+    titleBlacklist.forEach((blacklistedTitle) => {
+      // Skip empty or whitespace-only terms
+      if (blacklistedTitle.trim() && matchTermsWithWildCard(title.toLowerCase(), blacklistedTitle.toLowerCase())) {
+        blockedTitles.push(blacklistedTitle);
+      }
+    });
+    if (blockedTitles.length > 0) {
+      reasons.push({ titles: blockedTitles });
     }
 
-    const summaryTerm = findBlacklistedItem([summary.toLowerCase()], summaryBlacklist, contains);
-    if (summaryTerm) {
-      return { summary: summaryTerm };
+    // Check for blocked summary terms
+    const blockedSummaryTerms = [];
+    summaryBlacklist.forEach((summaryTerm) => {
+      // Skip empty or whitespace-only terms
+      if (summaryTerm.trim() && summary.toLowerCase().indexOf(summaryTerm.toLowerCase()) !== -1) {
+        blockedSummaryTerms.push(summaryTerm);
+      }
+    });
+    if (blockedSummaryTerms.length > 0) {
+      reasons.push({ summaryTerms: blockedSummaryTerms });
     }
 
-    return null;
+    return reasons.length > 0 ? reasons : null;
   }
 
   const _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
